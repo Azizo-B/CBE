@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 
 class CBEOpenDataPortal:
     """
-    A class to interact with the CBE (Kruispuntbank van Ondernemingen) Open Data portal.
+    A class to interact with the CBE (Crossroads Bank for Enterprises) Open Data portal.
 
     This class provides methods to authenticate with the CBE Open Data portal, retrieve available data extracts,
     and download specific or the latest extract files. The data extracts are typically provided as ZIP files

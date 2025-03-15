@@ -10,7 +10,7 @@ import pandas as pd
 
 class CBEOpenData:
     """
-    A class to interact with CBE (Kruispuntbank van Ondernemingen) Open Data files.
+    A class to interact with CBE (Crossroads Bank for Enterprises) Open Data files.
 
     This class provides methods to load, query, and analyze CBE Open Data, which contains information about
     enterprises, establishments, and their associated data (e.g., addresses, activities, contacts, etc.).

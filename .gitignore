@@ -1,1 +1,28 @@
+# Ignore Python build and distribution files
+dist/
+build/
+*.egg-info/
+*.egg
+*.pyc
+__pycache__/
+
+# Ignore Sphinx build files
+docs/build/
+docs/source/_templates/
+docs/source/_static/
+
+# Ignore virtual environment files
 venv/
+.env/
+.venv/
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore local configuration files
+*.env
+*.ini
+*.cfg
