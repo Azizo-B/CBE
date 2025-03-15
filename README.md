@@ -1,5 +1,7 @@
 # CBE - Crossroads Bank for Enterprises Python Package
 
+**GitHub Repository**: [https://github.com/Azizo-B/cbe](https://github.com/azizo-b/CBE)
+
 The **CBE** package provides a Python interface to work with the **Crossroads Bank for Enterprises (CBE)**, also known as:
 
 - **Kruispuntbank van Ondernemingen (KBO)** in Dutch
@@ -70,7 +72,7 @@ print(enterprise_info)
 
 ## Documentation
 
-For detailed documentation, including examples and API reference, visit the [CBE Documentation](https://Azizo-B.github.io/cbe).
+For detailed documentation, including examples and API reference, visit the [CBE Documentation](https://Azizo-B.github.io/CBE).
 
 ## Links
 
