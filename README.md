@@ -72,7 +72,7 @@ print(enterprise_info)
 
 ## Documentation
 
-For detailed documentation, including examples and API reference, visit the [CBE Documentation](https://Azizo-B.github.io/CBE).
+For detailed documentation, including examples and API reference, visit the [CBE package Documentation](https://azizo-b.github.io/CBE/index.html).
 
 ## Links
 

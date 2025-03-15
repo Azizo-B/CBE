@@ -59,10 +59,11 @@ jobs:
         run: |
             for file in dist/*; do
               echo "Uploading $file"
-              curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              curl -s -H "Authorization: token ${{ github.token }}" \
                    -H "Accept: application/vnd.github.v3+json" \
                    -H "Content-Type: application/octet-stream" \
                    --form "name=$(basename $file)" \
                    --form "file=@$file" \
-                   "${{ steps.create_release.outputs.upload_url }}"
+                   "${{ steps.create_release.outputs.upload_url }}?name=$(basename $file)"
+              echo "Upload response for $file: $?"
             done
