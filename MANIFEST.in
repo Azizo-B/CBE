@@ -1,0 +1,2 @@
+include cbe/schema.sql
+exclude venv/
