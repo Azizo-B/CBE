@@ -46,9 +46,19 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">cbe</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">cbe package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cbe-open-data-module">cbe.open_data module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#cbe-portal-module">cbe.portal module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cbe.open_data">cbe.open_data module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cbe.open_data.CBEOpenData"><code class="docutils literal notranslate"><span class="pre">CBEOpenData</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cbe.portal">cbe.portal module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cbe.portal.CBEOpenDataPortal"><code class="docutils literal notranslate"><span class="pre">CBEOpenDataPortal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-cbe">Module contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cbe.CBEOpenData"><code class="docutils literal notranslate"><span class="pre">CBEOpenData</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cbe.CBEOpenDataPortal"><code class="docutils literal notranslate"><span class="pre">CBEOpenDataPortal</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -85,14 +95,1188 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 </section>
-<section id="cbe-open-data-module">
-<h2>cbe.open_data module<a class="headerlink" href="#cbe-open-data-module" title="Link to this heading"></a></h2>
+<section id="module-cbe.open_data">
+<span id="cbe-open-data-module"></span><h2>cbe.open_data module<a class="headerlink" href="#module-cbe.open_data" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cbe.open_data.</span></span><span class="sig-name descname"><span class="pre">CBEOpenData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zip_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">':memory:'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to interact with CBE (Crossroads Bank for Enterprises) Open Data files.</p>
+<p>This class provides methods to load, query, and analyze CBE Open Data, which contains information about
+enterprises, establishments, and their associated data (e.g., addresses, activities, contacts, etc.).
+The data is typically provided in a ZIP file containing CSV files, which are loaded into an SQLite database
+for efficient querying.</p>
+<p>The class supports:
+- Loading data from a local ZIP file.
+- Querying enterprise details, denominations, addresses, activities, contacts, and more.
+- Replacing code-based fields with their human-readable descriptions using CBE code tables.
+- Mimicking the data structure available on the CBE Public Search website.</p>
+<p>Links:
+- CBE Open Data Portal: <a class="reference external" href="https://kbopub.economie.fgov.be/kbo-open-data/">https://kbopub.economie.fgov.be/kbo-open-data/</a>
+- CBE Public Search: <a class="reference external" href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html">https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html</a>
+- CBE Extra Info: <a class="reference external" href="https://economie.fgov.be/nl/themas/ondernemingen/kruispuntbank-van/diensten-voor-iedereen/hergebruik-van-publieke">https://economie.fgov.be/nl/themas/ondernemingen/kruispuntbank-van/diensten-voor-iedereen/hergebruik-van-publieke</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.zip_path">
+<span class="sig-name descname"><span class="pre">zip_path</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.zip_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the ZIP file containing CBE Open Data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.db_path">
+<span class="sig-name descname"><span class="pre">db_path</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.db_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the SQLite database (defaults to in-memory database).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.schema_path">
+<span class="sig-name descname"><span class="pre">schema_path</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.schema_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the SQL schema file for creating database tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.force_load">
+<span class="sig-name descname"><span class="pre">force_load</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.force_load" title="Link to this definition"></a></dt>
+<dd><p>Whether to force reloading of data even if it already exists in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.db_conn">
+<span class="sig-name descname"><span class="pre">db_conn</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.db_conn" title="Link to this definition"></a></dt>
+<dd><p>Connection to the SQLite database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sqlite3.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.zip_file">
+<span class="sig-name descname"><span class="pre">zip_file</span></span><a class="headerlink" href="#cbe.open_data.CBEOpenData.zip_file" title="Link to this definition"></a></dt>
+<dd><p>Handle to the opened ZIP file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>zipfile.ZipFile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the CBEOpenData instance and loads data into the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.query" title="Link to this definition"></a></dt>
+<dd><p>Executes a generic SQL query on the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_code">
+<span class="sig-name descname"><span class="pre">get_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_code" title="Link to this definition"></a></dt>
+<dd><p>Fetches a code table entry for a given category, code, and language.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_denominations">
+<span class="sig-name descname"><span class="pre">get_denominations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_denominations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_denominations" title="Link to this definition"></a></dt>
+<dd><p>Retrieves denominations for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_addresses">
+<span class="sig-name descname"><span class="pre">get_addresses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_addresses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_addresses" title="Link to this definition"></a></dt>
+<dd><p>Retrieves addresses for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_contacts">
+<span class="sig-name descname"><span class="pre">get_contacts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_contacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_contacts" title="Link to this definition"></a></dt>
+<dd><p>Retrieves contacts for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_activities">
+<span class="sig-name descname"><span class="pre">get_activities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_activities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_activities" title="Link to this definition"></a></dt>
+<dd><p>Retrieves activities for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_branches">
+<span class="sig-name descname"><span class="pre">get_branches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_branches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_branches" title="Link to this definition"></a></dt>
+<dd><p>Retrieves branches for a given enterprise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_establishments">
+<span class="sig-name descname"><span class="pre">get_establishments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_establishments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_establishments" title="Link to this definition"></a></dt>
+<dd><p>Retrieves establishments for a given enterprise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.get_enterprise">
+<span class="sig-name descname"><span class="pre">get_enterprise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_enterprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.get_enterprise" title="Link to this definition"></a></dt>
+<dd><p>Retrieves enterprise details with code-based fields replaced by descriptions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.open_data.CBEOpenData.search" title="Link to this definition"></a></dt>
+<dd><p>Retrieves all information tied to an enterprise number, mimicking the CBE Public Search website.</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cbe_open_data</span> <span class="o">=</span> <span class="n">CBEOpenData</span><span class="p">(</span>
+<span class="go">        zip_path=&#39;KboOpenData_0133_2025_03_Full.zip&#39;,</span>
+<span class="go">        db_path=&#39;cbe_open_data.db&#39;,</span>
+<span class="go">        force_load=True</span>
+<span class="go">    )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enterprise_info</span> <span class="o">=</span> <span class="n">cbe_open_data</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;1234.567.890&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">enterprise_info</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The class uses an LRU cache to optimize repeated queries.</p></li>
+<li><p>Ensure the schema file is correctly configured to match the CSV file structure.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.open_data.CBEOpenData.REQUIRED_FILES">
+<span class="sig-name descname"><span class="pre">REQUIRED_FILES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'activity.csv',</span> <span class="pre">'address.csv',</span> <span class="pre">'branch.csv',</span> <span class="pre">'code.csv',</span> <span class="pre">'contact.csv',</span> <span class="pre">'denomination.csv',</span> <span class="pre">'enterprise.csv',</span> <span class="pre">'establishment.csv',</span> <span class="pre">'meta.csv'}</span></em><a class="headerlink" href="#cbe.open_data.CBEOpenData.REQUIRED_FILES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">get_activities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_activities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd><p>Retrieve activities for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of activities with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">get_addresses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_addresses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd><p>Retrieve addresses for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of addresses with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">get_branches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_branches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Retrieve branches for a given enterprise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of branches.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">get_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd><p>Fetch the code table entry for a given category, code, and language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>str</em>) – The category of the code (e.g., “Status”, “JuridicalSituation”).</p></li>
+<li><p><strong>code</strong> (<em>str</em>) – The code to look up.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language of the description (default is “NL” for Dutch).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the code, language, and description.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">get_contacts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_contacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd><p>Retrieve contacts for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of contacts with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">get_denominations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_denominations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd><p>Retrieve denominations for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of denominations with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">get_enterprise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_enterprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd><p>Retrieve enterprise details and replace code-based fields with their descriptions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing enterprise details with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">get_establishments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_establishments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd><p>Retrieve establishments for a given enterprise, including their addresses and denominations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of establishments with their addresses and denominations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Row</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd><p>Generic query method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd><p>Retrieve all information tied to an enterprise number, including enterprise details, denominations, addresses,
+establishments, contacts, activities, and branches. This function mimics the data structure and details
+available on the CBE Public Search website (<a class="reference external" href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html">https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html</a>).</p>
+<p>The function replaces code-based fields (e.g., Status, JuridicalSituation, TypeOfEnterprise) with their
+corresponding descriptions from the CBE code tables, based on the specified language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions (e.g., “NL”, “FR”, “DE”, “EN”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing all information tied to the enterprise, with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="cbe-portal-module">
-<h2>cbe.portal module<a class="headerlink" href="#cbe-portal-module" title="Link to this heading"></a></h2>
+<section id="module-cbe.portal">
+<span id="cbe-portal-module"></span><h2>cbe.portal module<a class="headerlink" href="#module-cbe.portal" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cbe.portal.</span></span><span class="sig-name descname"><span class="pre">CBEOpenDataPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to interact with the CBE (Crossroads Bank for Enterprises) Open Data portal.</p>
+<p>This class provides methods to authenticate with the CBE Open Data portal, retrieve available data extracts,
+and download specific or the latest extract files. The data extracts are typically provided as ZIP files
+containing CSV files, which can be used for further processing and analysis.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.BASE_URL">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>The base URL for the CBE Open Data portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.LOGIN_ENDPOINT">
+<span class="sig-name descname"><span class="pre">LOGIN_ENDPOINT</span></span><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.LOGIN_ENDPOINT" title="Link to this definition"></a></dt>
+<dd><p>The endpoint for authenticating with the CBE Open Data portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.EXTRACT_PAGE">
+<span class="sig-name descname"><span class="pre">EXTRACT_PAGE</span></span><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.EXTRACT_PAGE" title="Link to this definition"></a></dt>
+<dd><p>The URL of the page listing available extract files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.EXTRACT_FILE_NAME">
+<span class="sig-name descname"><span class="pre">EXTRACT_FILE_NAME</span></span><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.EXTRACT_FILE_NAME" title="Link to this definition"></a></dt>
+<dd><p>A regex pattern to parse extract file names and extract metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the CBEOpenDataPortal instance and logs in to the CBE Open Data portal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.login_to_cbe">
+<span class="sig-name descname"><span class="pre">login_to_cbe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.login_to_cbe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.login_to_cbe" title="Link to this definition"></a></dt>
+<dd><p>Logs into the CBE Open Data portal and returns an authenticated session.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.list_available_extracts">
+<span class="sig-name descname"><span class="pre">list_available_extracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.list_available_extracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.list_available_extracts" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a list of available extract files from the CBE Open Data portal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.get_extract_url">
+<span class="sig-name descname"><span class="pre">get_extract_url</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.get_extract_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.get_extract_url" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the file url of a specific or the latest CBE extract file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.download_zip">
+<span class="sig-name descname"><span class="pre">download_zip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.download_zip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.download_zip" title="Link to this definition"></a></dt>
+<dd><p>Downloads a CBE extract file from the portal and saves it locally.</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">portal</span> <span class="o">=</span> <span class="n">CBEOpenDataPortal</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;your_username&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;your_password&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extracts</span> <span class="o">=</span> <span class="n">portal</span><span class="o">.</span><span class="n">list_available_extracts</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">extract</span> <span class="ow">in</span> <span class="n">extracts</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extract: </span><span class="si">{</span><span class="n">extract</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_url</span> <span class="o">=</span> <span class="n">portal</span><span class="o">.</span><span class="n">get_extract_url</span><span class="p">(</span><span class="n">extract_number</span><span class="o">=</span><span class="s2">&quot;0133&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extract Url: </span><span class="si">{</span><span class="n">extract_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">portal</span><span class="o">.</span><span class="n">download_zip</span><span class="p">(</span><span class="n">extract_number</span><span class="o">=</span><span class="s2">&quot;0133&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The CBE Open Data portal requires authentication to access extract files.</p></li>
+<li><p>The class uses the <cite>requests</cite> library for HTTP requests and <cite>BeautifulSoup</cite> for parsing HTML.</p></li>
+<li><p>Extracts are identified by their extract number, year, month, and type (e.g., “Full” or “Update”).</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.portal.CBEOpenDataPortal.BASE_EXTRACT_URL">
+<span class="sig-name descname"><span class="pre">BASE_EXTRACT_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/affiliation/xml'</span></em><a class="headerlink" href="#cbe.portal.CBEOpenDataPortal.BASE_EXTRACT_URL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data'</span></em><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">EXTRACT_FILE_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.*(?P&lt;extract_number&gt;\\d{4})_(?P&lt;year&gt;\\d{4})_(?P&lt;month_num&gt;\\d{2})_.*(?P&lt;extract_type&gt;Full|Update).zip'</span></em><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">EXTRACT_PAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/affiliation/xml/?files'</span></em><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">LOGIN_ENDPOINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/static/j_spring_security_check'</span></em><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">download_zip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_download</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.download_zip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd><p>Downloads the CBE Open Data ZIP file from the official CBE portal.</p>
+<p>This method downloads the ZIP file for the specified extract (or the latest one).
+The downloaded file is saved in <cite>download_dir</cite> with its original name (e.g., <cite>KboOpenData_0133_2025_03_Full.zip</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extract_number</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract number to download. Defaults to latest.</p></li>
+<li><p><strong>extract_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract type, either ‘Full’ or ‘Update’. Defaults to ‘Full’.</p></li>
+<li><p><strong>download_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to save the downloaded ZIP file. Defaults to “data”.</p></li>
+<li><p><strong>force_download</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to overwrite an existing file. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The path of the downloaded ZIP file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the download process encounters an error or if extract is not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">get_extract_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Full'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.get_extract_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the file path of the CBE extract file based on the provided extract number.</p>
+<p>If an extract number is provided, it will return the corresponding file path,
+if not provided, it will return the latest extract found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extract_number</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract number to find a specific extract file. If not provided,
+the most recent extract will be returned.</p></li>
+<li><p><strong>extract_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract type, either ‘Full’ or ‘Update’. Defaults to ‘Full’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The file path of the requested CBE extract file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an extract with the specified number is not found or no extracts are found at all.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">list_available_extracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.list_available_extracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd><p>Retrieves available extract files from the CBE Open Data page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>A list of dictionaries representing the available extract files.</p>
+<blockquote>
+<div><p>Each dictionary has the following keys:
+- extract_number: The extract number (e.g., “0133”).
+- year: The year of the extract (e.g., “2024”).
+- month_num: The month of the extract (e.g., “03”).
+- extract_type: The type of the extract (e.g., “Full” or “Update”).
+- file_url: The file url of the extract.</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If no extracts are found at all.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id17">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">login_to_cbe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Session</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.login_to_cbe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dd><p>Logs into the CBE Open Data portal and returns an authenticated session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> (<em>str</em>) – The username for logging in.</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – The password for logging in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An authenticated session object for subsequent requests.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>requests.Session</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If authentication fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<section id="module-cbe">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-cbe" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="cbe.CBEOpenData">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cbe.</span></span><span class="sig-name descname"><span class="pre">CBEOpenData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zip_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">':memory:'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_load</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to interact with CBE (Crossroads Bank for Enterprises) Open Data files.</p>
+<p>This class provides methods to load, query, and analyze CBE Open Data, which contains information about
+enterprises, establishments, and their associated data (e.g., addresses, activities, contacts, etc.).
+The data is typically provided in a ZIP file containing CSV files, which are loaded into an SQLite database
+for efficient querying.</p>
+<p>The class supports:
+- Loading data from a local ZIP file.
+- Querying enterprise details, denominations, addresses, activities, contacts, and more.
+- Replacing code-based fields with their human-readable descriptions using CBE code tables.
+- Mimicking the data structure available on the CBE Public Search website.</p>
+<p>Links:
+- CBE Open Data Portal: <a class="reference external" href="https://kbopub.economie.fgov.be/kbo-open-data/">https://kbopub.economie.fgov.be/kbo-open-data/</a>
+- CBE Public Search: <a class="reference external" href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html">https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html</a>
+- CBE Extra Info: <a class="reference external" href="https://economie.fgov.be/nl/themas/ondernemingen/kruispuntbank-van/diensten-voor-iedereen/hergebruik-van-publieke">https://economie.fgov.be/nl/themas/ondernemingen/kruispuntbank-van/diensten-voor-iedereen/hergebruik-van-publieke</a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.zip_path">
+<span class="sig-name descname"><span class="pre">zip_path</span></span><a class="headerlink" href="#cbe.CBEOpenData.zip_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the ZIP file containing CBE Open Data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.db_path">
+<span class="sig-name descname"><span class="pre">db_path</span></span><a class="headerlink" href="#cbe.CBEOpenData.db_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the SQLite database (defaults to in-memory database).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.schema_path">
+<span class="sig-name descname"><span class="pre">schema_path</span></span><a class="headerlink" href="#cbe.CBEOpenData.schema_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the SQL schema file for creating database tables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.force_load">
+<span class="sig-name descname"><span class="pre">force_load</span></span><a class="headerlink" href="#cbe.CBEOpenData.force_load" title="Link to this definition"></a></dt>
+<dd><p>Whether to force reloading of data even if it already exists in the database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.db_conn">
+<span class="sig-name descname"><span class="pre">db_conn</span></span><a class="headerlink" href="#cbe.CBEOpenData.db_conn" title="Link to this definition"></a></dt>
+<dd><p>Connection to the SQLite database.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sqlite3.Connection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.zip_file">
+<span class="sig-name descname"><span class="pre">zip_file</span></span><a class="headerlink" href="#cbe.CBEOpenData.zip_file" title="Link to this definition"></a></dt>
+<dd><p>Handle to the opened ZIP file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>zipfile.ZipFile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the CBEOpenData instance and loads data into the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.query">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.query" title="Link to this definition"></a></dt>
+<dd><p>Executes a generic SQL query on the database.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_code">
+<span class="sig-name descname"><span class="pre">get_code</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_code" title="Link to this definition"></a></dt>
+<dd><p>Fetches a code table entry for a given category, code, and language.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_denominations">
+<span class="sig-name descname"><span class="pre">get_denominations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_denominations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_denominations" title="Link to this definition"></a></dt>
+<dd><p>Retrieves denominations for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_addresses">
+<span class="sig-name descname"><span class="pre">get_addresses</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_addresses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_addresses" title="Link to this definition"></a></dt>
+<dd><p>Retrieves addresses for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_contacts">
+<span class="sig-name descname"><span class="pre">get_contacts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_contacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_contacts" title="Link to this definition"></a></dt>
+<dd><p>Retrieves contacts for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_activities">
+<span class="sig-name descname"><span class="pre">get_activities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_activities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_activities" title="Link to this definition"></a></dt>
+<dd><p>Retrieves activities for a given entity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_branches">
+<span class="sig-name descname"><span class="pre">get_branches</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_branches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_branches" title="Link to this definition"></a></dt>
+<dd><p>Retrieves branches for a given enterprise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_establishments">
+<span class="sig-name descname"><span class="pre">get_establishments</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_establishments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_establishments" title="Link to this definition"></a></dt>
+<dd><p>Retrieves establishments for a given enterprise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.get_enterprise">
+<span class="sig-name descname"><span class="pre">get_enterprise</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_enterprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.get_enterprise" title="Link to this definition"></a></dt>
+<dd><p>Retrieves enterprise details with code-based fields replaced by descriptions.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenData.search" title="Link to this definition"></a></dt>
+<dd><p>Retrieves all information tied to an enterprise number, mimicking the CBE Public Search website.</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">cbe_open_data</span> <span class="o">=</span> <span class="n">CBEOpenData</span><span class="p">(</span>
+<span class="go">        zip_path=&#39;KboOpenData_0133_2025_03_Full.zip&#39;,</span>
+<span class="go">        db_path=&#39;cbe_open_data.db&#39;,</span>
+<span class="go">        force_load=True</span>
+<span class="go">    )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">enterprise_info</span> <span class="o">=</span> <span class="n">cbe_open_data</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;1234.567.890&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">enterprise_info</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The class uses an LRU cache to optimize repeated queries.</p></li>
+<li><p>Ensure the schema file is correctly configured to match the CSV file structure.</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenData.REQUIRED_FILES">
+<span class="sig-name descname"><span class="pre">REQUIRED_FILES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'activity.csv',</span> <span class="pre">'address.csv',</span> <span class="pre">'branch.csv',</span> <span class="pre">'code.csv',</span> <span class="pre">'contact.csv',</span> <span class="pre">'denomination.csv',</span> <span class="pre">'enterprise.csv',</span> <span class="pre">'establishment.csv',</span> <span class="pre">'meta.csv'}</span></em><a class="headerlink" href="#cbe.CBEOpenData.REQUIRED_FILES" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">get_activities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_activities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dd><p>Retrieve activities for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of activities with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">get_addresses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_addresses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id19" title="Link to this definition"></a></dt>
+<dd><p>Retrieve addresses for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of addresses with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">get_branches</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_branches"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
+<dd><p>Retrieve branches for a given enterprise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of branches.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">get_code</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_code"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id21" title="Link to this definition"></a></dt>
+<dd><p>Fetch the code table entry for a given category, code, and language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>category</strong> (<em>str</em>) – The category of the code (e.g., “Status”, “JuridicalSituation”).</p></li>
+<li><p><strong>code</strong> (<em>str</em>) – The code to look up.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language of the description (default is “NL” for Dutch).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the code, language, and description.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">get_contacts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_contacts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id22" title="Link to this definition"></a></dt>
+<dd><p>Retrieve contacts for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of contacts with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">get_denominations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_denominations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id23" title="Link to this definition"></a></dt>
+<dd><p>Retrieve denominations for a given entity (enterprise or establishment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>entity_number</strong> (<em>str</em>) – The entity number (enterprise or establishment number).</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of denominations with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-name descname"><span class="pre">get_enterprise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_enterprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id24" title="Link to this definition"></a></dt>
+<dd><p>Retrieve enterprise details and replace code-based fields with their descriptions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing enterprise details with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id25">
+<span class="sig-name descname"><span class="pre">get_establishments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.get_establishments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id25" title="Link to this definition"></a></dt>
+<dd><p>Retrieve establishments for a given enterprise, including their addresses and denominations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of establishments with their addresses and denominations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id26">
+<span class="sig-name descname"><span class="pre">query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">Row</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id26" title="Link to this definition"></a></dt>
+<dd><p>Generic query method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id27">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enterprise_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">language</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'NL'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/cbe/open_data.html#CBEOpenData.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id27" title="Link to this definition"></a></dt>
+<dd><p>Retrieve all information tied to an enterprise number, including enterprise details, denominations, addresses,
+establishments, contacts, activities, and branches. This function mimics the data structure and details
+available on the CBE Public Search website (<a class="reference external" href="https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html">https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html</a>).</p>
+<p>The function replaces code-based fields (e.g., Status, JuridicalSituation, TypeOfEnterprise) with their
+corresponding descriptions from the CBE code tables, based on the specified language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enterprise_number</strong> (<em>str</em>) – The enterprise number in the format ‘XXXX.XXX.XXX’.</p></li>
+<li><p><strong>language</strong> (<em>str</em>) – The language for code table descriptions (e.g., “NL”, “FR”, “DE”, “EN”).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing all information tied to the enterprise, with code table lookups applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">cbe.</span></span><span class="sig-name descname"><span class="pre">CBEOpenDataPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class to interact with the CBE (Crossroads Bank for Enterprises) Open Data portal.</p>
+<p>This class provides methods to authenticate with the CBE Open Data portal, retrieve available data extracts,
+and download specific or the latest extract files. The data extracts are typically provided as ZIP files
+containing CSV files, which can be used for further processing and analysis.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.BASE_URL">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><a class="headerlink" href="#cbe.CBEOpenDataPortal.BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>The base URL for the CBE Open Data portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.LOGIN_ENDPOINT">
+<span class="sig-name descname"><span class="pre">LOGIN_ENDPOINT</span></span><a class="headerlink" href="#cbe.CBEOpenDataPortal.LOGIN_ENDPOINT" title="Link to this definition"></a></dt>
+<dd><p>The endpoint for authenticating with the CBE Open Data portal.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.EXTRACT_PAGE">
+<span class="sig-name descname"><span class="pre">EXTRACT_PAGE</span></span><a class="headerlink" href="#cbe.CBEOpenDataPortal.EXTRACT_PAGE" title="Link to this definition"></a></dt>
+<dd><p>The URL of the page listing available extract files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.EXTRACT_FILE_NAME">
+<span class="sig-name descname"><span class="pre">EXTRACT_FILE_NAME</span></span><a class="headerlink" href="#cbe.CBEOpenDataPortal.EXTRACT_FILE_NAME" title="Link to this definition"></a></dt>
+<dd><p>A regex pattern to parse extract file names and extract metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal.__init__" title="Link to this definition"></a></dt>
+<dd><p>Initializes the CBEOpenDataPortal instance and logs in to the CBE Open Data portal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.login_to_cbe">
+<span class="sig-name descname"><span class="pre">login_to_cbe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.login_to_cbe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal.login_to_cbe" title="Link to this definition"></a></dt>
+<dd><p>Logs into the CBE Open Data portal and returns an authenticated session.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.list_available_extracts">
+<span class="sig-name descname"><span class="pre">list_available_extracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.list_available_extracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal.list_available_extracts" title="Link to this definition"></a></dt>
+<dd><p>Retrieves a list of available extract files from the CBE Open Data portal.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.get_extract_url">
+<span class="sig-name descname"><span class="pre">get_extract_url</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.get_extract_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal.get_extract_url" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the file url of a specific or the latest CBE extract file.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.download_zip">
+<span class="sig-name descname"><span class="pre">download_zip</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.download_zip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cbe.CBEOpenDataPortal.download_zip" title="Link to this definition"></a></dt>
+<dd><p>Downloads a CBE extract file from the portal and saves it locally.</p>
+</dd></dl>
+
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">portal</span> <span class="o">=</span> <span class="n">CBEOpenDataPortal</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="s2">&quot;your_username&quot;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s2">&quot;your_password&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extracts</span> <span class="o">=</span> <span class="n">portal</span><span class="o">.</span><span class="n">list_available_extracts</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">extract</span> <span class="ow">in</span> <span class="n">extracts</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extract: </span><span class="si">{</span><span class="n">extract</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extract_url</span> <span class="o">=</span> <span class="n">portal</span><span class="o">.</span><span class="n">get_extract_url</span><span class="p">(</span><span class="n">extract_number</span><span class="o">=</span><span class="s2">&quot;0133&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extract Url: </span><span class="si">{</span><span class="n">extract_url</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">portal</span><span class="o">.</span><span class="n">download_zip</span><span class="p">(</span><span class="n">extract_number</span><span class="o">=</span><span class="s2">&quot;0133&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The CBE Open Data portal requires authentication to access extract files.</p></li>
+<li><p>The class uses the <cite>requests</cite> library for HTTP requests and <cite>BeautifulSoup</cite> for parsing HTML.</p></li>
+<li><p>Extracts are identified by their extract number, year, month, and type (e.g., “Full” or “Update”).</p></li>
+</ul>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cbe.CBEOpenDataPortal.BASE_EXTRACT_URL">
+<span class="sig-name descname"><span class="pre">BASE_EXTRACT_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/affiliation/xml'</span></em><a class="headerlink" href="#cbe.CBEOpenDataPortal.BASE_EXTRACT_URL" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id28">
+<span class="sig-name descname"><span class="pre">BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data'</span></em><a class="headerlink" href="#id28" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id29">
+<span class="sig-name descname"><span class="pre">EXTRACT_FILE_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'.*(?P&lt;extract_number&gt;\\d{4})_(?P&lt;year&gt;\\d{4})_(?P&lt;month_num&gt;\\d{2})_.*(?P&lt;extract_type&gt;Full|Update).zip'</span></em><a class="headerlink" href="#id29" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id30">
+<span class="sig-name descname"><span class="pre">EXTRACT_PAGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/affiliation/xml/?files'</span></em><a class="headerlink" href="#id30" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id31">
+<span class="sig-name descname"><span class="pre">LOGIN_ENDPOINT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://kbopub.economie.fgov.be/kbo-open-data/static/j_spring_security_check'</span></em><a class="headerlink" href="#id31" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id32">
+<span class="sig-name descname"><span class="pre">download_zip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Full'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_download</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.download_zip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id32" title="Link to this definition"></a></dt>
+<dd><p>Downloads the CBE Open Data ZIP file from the official CBE portal.</p>
+<p>This method downloads the ZIP file for the specified extract (or the latest one).
+The downloaded file is saved in <cite>download_dir</cite> with its original name (e.g., <cite>KboOpenData_0133_2025_03_Full.zip</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extract_number</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract number to download. Defaults to latest.</p></li>
+<li><p><strong>extract_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract type, either ‘Full’ or ‘Update’. Defaults to ‘Full’.</p></li>
+<li><p><strong>download_dir</strong> (<em>str</em><em>, </em><em>optional</em>) – Directory to save the downloaded ZIP file. Defaults to “data”.</p></li>
+<li><p><strong>force_download</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to overwrite an existing file. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The path of the downloaded ZIP file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the download process encounters an error or if extract is not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id33">
+<span class="sig-name descname"><span class="pre">get_extract_url</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extract_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extract_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Full'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.get_extract_url"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id33" title="Link to this definition"></a></dt>
+<dd><p>Retrieves the file path of the CBE extract file based on the provided extract number.</p>
+<p>If an extract number is provided, it will return the corresponding file path,
+if not provided, it will return the latest extract found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extract_number</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract number to find a specific extract file. If not provided,
+the most recent extract will be returned.</p></li>
+<li><p><strong>extract_type</strong> (<em>str</em><em>, </em><em>optional</em>) – The extract type, either ‘Full’ or ‘Update’. Defaults to ‘Full’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The file path of the requested CBE extract file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an extract with the specified number is not found or no extracts are found at all.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id34">
+<span class="sig-name descname"><span class="pre">list_available_extracts</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.list_available_extracts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id34" title="Link to this definition"></a></dt>
+<dd><p>Retrieves available extract files from the CBE Open Data page.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>A list of dictionaries representing the available extract files.</p>
+<blockquote>
+<div><p>Each dictionary has the following keys:
+- extract_number: The extract number (e.g., “0133”).
+- year: The year of the extract (e.g., “2024”).
+- month_num: The month of the extract (e.g., “03”).
+- extract_type: The type of the extract (e.g., “Full” or “Update”).
+- file_url: The file url of the extract.</p>
+</div></blockquote>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If no extracts are found at all.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id35">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">login_to_cbe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">username</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Session</span></span></span><a class="reference internal" href="_modules/cbe/portal.html#CBEOpenDataPortal.login_to_cbe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id35" title="Link to this definition"></a></dt>
+<dd><p>Logs into the CBE Open Data portal and returns an authenticated session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>username</strong> (<em>str</em>) – The username for logging in.</p></li>
+<li><p><strong>password</strong> (<em>str</em>) – The password for logging in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An authenticated session object for subsequent requests.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>requests.Session</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If authentication fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 

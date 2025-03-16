@@ -1,0 +1,588 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cbe.open_data &mdash; CBE  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            CBE
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">cbe</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CBE</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">cbe.open_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for cbe.open_data</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_file</span><span class="p">,</span> <span class="n">files</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextIOWrapper</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="CBEOpenData">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CBEOpenData</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to interact with CBE (Crossroads Bank for Enterprises) Open Data files.</span>
+
+<span class="sd">    This class provides methods to load, query, and analyze CBE Open Data, which contains information about</span>
+<span class="sd">    enterprises, establishments, and their associated data (e.g., addresses, activities, contacts, etc.).</span>
+<span class="sd">    The data is typically provided in a ZIP file containing CSV files, which are loaded into an SQLite database</span>
+<span class="sd">    for efficient querying.</span>
+
+<span class="sd">    The class supports:</span>
+<span class="sd">    - Loading data from a local ZIP file.</span>
+<span class="sd">    - Querying enterprise details, denominations, addresses, activities, contacts, and more.</span>
+<span class="sd">    - Replacing code-based fields with their human-readable descriptions using CBE code tables.</span>
+<span class="sd">    - Mimicking the data structure available on the CBE Public Search website.</span>
+
+<span class="sd">    Links:</span>
+<span class="sd">    - CBE Open Data Portal: https://kbopub.economie.fgov.be/kbo-open-data/</span>
+<span class="sd">    - CBE Public Search: https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html</span>
+<span class="sd">    - CBE Extra Info: https://economie.fgov.be/nl/themas/ondernemingen/kruispuntbank-van/diensten-voor-iedereen/hergebruik-van-publieke</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        zip_path (str): Path to the ZIP file containing CBE Open Data.</span>
+<span class="sd">        db_path (str): Path to the SQLite database (defaults to in-memory database).</span>
+<span class="sd">        schema_path (str): Path to the SQL schema file for creating database tables.</span>
+<span class="sd">        force_load (bool): Whether to force reloading of data even if it already exists in the database.</span>
+<span class="sd">        db_conn (sqlite3.Connection): Connection to the SQLite database.</span>
+<span class="sd">        zip_file (zipfile.ZipFile): Handle to the opened ZIP file.</span>
+
+
+<span class="sd">    Methods:</span>
+<span class="sd">        __init__: Initializes the CBEOpenData instance and loads data into the database.</span>
+<span class="sd">        query: Executes a generic SQL query on the database.</span>
+<span class="sd">        get_code: Fetches a code table entry for a given category, code, and language.</span>
+<span class="sd">        get_denominations: Retrieves denominations for a given entity.</span>
+<span class="sd">        get_addresses: Retrieves addresses for a given entity.</span>
+<span class="sd">        get_contacts: Retrieves contacts for a given entity.</span>
+<span class="sd">        get_activities: Retrieves activities for a given entity.</span>
+<span class="sd">        get_branches: Retrieves branches for a given enterprise.</span>
+<span class="sd">        get_establishments: Retrieves establishments for a given enterprise.</span>
+<span class="sd">        get_enterprise: Retrieves enterprise details with code-based fields replaced by descriptions.</span>
+<span class="sd">        search: Retrieves all information tied to an enterprise number, mimicking the CBE Public Search website.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; cbe_open_data = CBEOpenData(</span>
+<span class="sd">                zip_path=&#39;KboOpenData_0133_2025_03_Full.zip&#39;,</span>
+<span class="sd">                db_path=&#39;cbe_open_data.db&#39;,</span>
+<span class="sd">                force_load=True</span>
+<span class="sd">            )</span>
+<span class="sd">        &gt;&gt;&gt; enterprise_info = cbe_open_data.search(&quot;1234.567.890&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; print(enterprise_info)</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - The class uses an LRU cache to optimize repeated queries.</span>
+<span class="sd">        - Ensure the schema file is correctly configured to match the CSV file structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">REQUIRED_FILES</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;activity.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;address.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;branch.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;code.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;contact.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;denomination.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;enterprise.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;establishment.csv&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;meta.csv&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="CBEOpenData.__init__">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.__init__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">db_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;:memory:&quot;</span><span class="p">,</span> <span class="n">force_load</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the CBEOpenData instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            zip_path (str): Path to the ZIP file.</span>
+<span class="sd">            db_path (str, optional): Path to the SQLite database. Defaults to `:memory:`.</span>
+<span class="sd">            force_load (bool, optional): Whether to force data reload. Defaults to `False`.</span>
+<span class="sd">            schema_path (str, optional): Path to the SQL schema file. Defaults to the packaged `schema.sql`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zip_path</span> <span class="o">=</span> <span class="n">zip_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_path</span> <span class="o">=</span> <span class="n">db_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">force_load</span> <span class="o">=</span> <span class="n">force_load</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_path</span><span class="p">)</span>
+
+        <span class="c1"># Use the packaged schema.sql if no custom schema_path is provided</span>
+        <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Load the schema file from the package</span>
+            <span class="n">schema_resource</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cbe&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;schema.sql&quot;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">as_file</span><span class="p">(</span><span class="n">schema_resource</span><span class="p">)</span> <span class="k">as</span> <span class="n">schema_file</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">schema_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span> <span class="o">=</span> <span class="n">schema_path</span>
+
+        <span class="c1"># Validate required files</span>
+        <span class="n">zip_contents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">namelist</span><span class="p">())</span>
+        <span class="n">missing_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">REQUIRED_FILES</span> <span class="o">-</span> <span class="n">zip_contents</span>
+        <span class="k">if</span> <span class="n">missing_files</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required files in ZIP: </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">missing_files</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;meta.csv&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">meta_file</span><span class="p">:</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">TextIOWrapper</span><span class="p">(</span><span class="n">meta_file</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
+
+            <span class="c1"># Find ExtractNumber</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># Default if not found</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Variable&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;ExtractNumber&quot;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+                    <span class="k">break</span>  <span class="c1"># No need to read further</span>
+
+        <span class="c1"># Enable row access by column name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
+
+        <span class="c1"># Check if the meta table exists and if the extract number matches</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_load_data</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Skipping data loading because the extract number matches and force_load=False.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Info: To force a reload of the data, set force_load=True.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_load_schema</span><span class="p">()</span>
+
+        <span class="c1"># Load CSV data from the ZIP file</span>
+        <span class="k">for</span> <span class="n">csv_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">namelist</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">csv_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading </span><span class="si">{</span><span class="n">csv_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_load_csv_file</span><span class="p">(</span><span class="n">csv_name</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_should_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the data should be loaded based on the extract number and force_load flag.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if data should be loaded, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="c1"># Check if the meta table exists</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT name FROM sqlite_master WHERE type=&#39;table&#39; AND name=&#39;meta&#39;;&quot;</span><span class="p">)</span>
+        <span class="n">meta_table_exists</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">meta_table_exists</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: The meta table does not exist. Data will be loaded.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="c1"># Get the current extract number from the meta table</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT Value FROM meta WHERE Variable = &#39;ExtractNumber&#39;;&quot;</span><span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">row</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: No extract number found in the meta table. Data will be loaded.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">current_extract_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Check if the extract number matches</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_extract_number</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span><span class="p">:</span>
+            <span class="c1"># Matched but check if force_load is True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_load</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Extract number matches, but force_load is True. Data will be reloaded.&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># Skip loading</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;Warning: Extract number mismatch. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Current: </span><span class="si">{</span><span class="n">current_extract_number</span><span class="si">}</span><span class="s2">, Requested: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="s2">&quot;Data will be loaded.&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load SQL statements from a schema file and execute them to create tables and indexes.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">sql_script</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating SQL tables&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">executescript</span><span class="p">(</span><span class="n">sql_script</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_csv_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">csv_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load CSV file into the respective table.&quot;&quot;&quot;</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">csv_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Read the CSV file in chunks to avoid loading the entire file into memory</span>
+        <span class="n">chunk_iter</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">csv_name</span><span class="p">),</span>
+            <span class="n">chunksize</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>  <span class="c1"># Adjust chunk size based on memory constraints</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>  <span class="c1"># Ensure all data is treated as strings</span>
+            <span class="n">keep_default_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Avoid interpreting empty strings as NaN</span>
+        <span class="p">)</span>
+
+        <span class="n">rows_affected</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Process each chunk</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">chunk_iter</span><span class="p">:</span>
+
+            <span class="c1"># Append to the existing table</span>
+            <span class="n">rows_affected</span> <span class="o">+=</span> <span class="n">chunk</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">table_name</span><span class="p">,</span>
+                <span class="n">con</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="p">,</span>
+                <span class="n">if_exists</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Don&#39;t write row indices to the database</span>
+            <span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully loaded </span><span class="si">{</span><span class="n">rows_affected</span><span class="si">}</span><span class="s2"> rows from </span><span class="si">{</span><span class="n">csv_name</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Clean up resources when instance is destroyed.&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaning up resources...&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;db_conn&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Closing database connection&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;zip_file&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Closing ZIP file&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CBEOpenData.query">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.query">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generic query method.&quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_code">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_code">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fetch the code table entry for a given category, code, and language.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            category (str): The category of the code (e.g., &quot;Status&quot;, &quot;JuridicalSituation&quot;).</span>
+<span class="sd">            code (str): The code to look up.</span>
+<span class="sd">            language (str): The language of the description (default is &quot;NL&quot; for Dutch).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary containing the code, language, and description.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT Code, Language, Description FROM code WHERE Category = ? AND Code = ? AND Language = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">if</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_denominations">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_denominations">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_denominations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve denominations for a given entity (enterprise or establishment).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_number (str): The entity number (enterprise or establishment number).</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of denominations with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM denomination WHERE EntityNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">entity_number</span><span class="p">,))</span>
+        <span class="n">denominations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Language&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Language&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Language&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;TypeOfDenomination&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;TypeOfDenomination&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;TypeOfDenomination&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">denominations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">denominations</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_addresses">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_addresses">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_addresses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve addresses for a given entity (enterprise or establishment).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_number (str): The entity number (enterprise or establishment number).</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of addresses with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM address WHERE EntityNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">entity_number</span><span class="p">,))</span>
+        <span class="n">addresses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;TypeOfAddress&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;TypeOfAddress&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;TypeOfAddress&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">addresses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">addresses</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_contacts">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_contacts">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve contacts for a given entity (enterprise or establishment).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_number (str): The entity number (enterprise or establishment number).</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of contacts with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM contact WHERE EntityNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">entity_number</span><span class="p">,))</span>
+        <span class="n">contacts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;EntityContact&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;EntityContact&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;EntityContact&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;ContactType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;ContactType&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;ContactType&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">contacts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">contacts</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_activities">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_activities">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_activities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve activities for a given entity (enterprise or establishment).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity_number (str): The entity number (enterprise or establishment number).</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of activities with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM activity WHERE EntityNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">entity_number</span><span class="p">,))</span>
+        <span class="n">activities</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;ActivityGroup&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;ActivityGroup&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;ActivityGroup&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Classification&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Classification&quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;Classification&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">nace_version</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;NaceVersion&quot;</span><span class="p">]</span>
+            <span class="n">nace_code</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s2">&quot;NaceCode&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nace_version</span> <span class="o">==</span> <span class="s2">&quot;2003&quot;</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;NaceCode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Nace2003&quot;</span><span class="p">,</span> <span class="n">nace_code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">nace_version</span> <span class="o">==</span> <span class="s2">&quot;2008&quot;</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;NaceCode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Nace2008&quot;</span><span class="p">,</span> <span class="n">nace_code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">nace_version</span> <span class="o">==</span> <span class="s2">&quot;2025&quot;</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s2">&quot;NaceCode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Nace2025&quot;</span><span class="p">,</span> <span class="n">nace_code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">activities</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">activities</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_branches">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_branches">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve branches for a given enterprise.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enterprise_number (str): The enterprise number in the format &#39;XXXX.XXX.XXX&#39;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of branches.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM branch WHERE EnterpriseNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">enterprise_number</span><span class="p">,))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()]</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_establishments">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_establishments">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_establishments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve establishments for a given enterprise, including their addresses and denominations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enterprise_number (str): The enterprise number in the format &#39;XXXX.XXX.XXX&#39;.</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A list of establishments with their addresses and denominations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM establishment WHERE EnterpriseNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">enterprise_number</span><span class="p">,))</span>
+        <span class="n">establishments</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">():</span>
+            <span class="n">establishment</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;addresses&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_addresses</span><span class="p">(</span><span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;EstablishmentNumber&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;denominations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_denominations</span><span class="p">(</span><span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;EstablishmentNumber&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;contacts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contacts</span><span class="p">(</span><span class="n">establishment</span><span class="p">[</span><span class="s2">&quot;EstablishmentNumber&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">establishments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">establishment</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">establishments</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.get_enterprise">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_enterprise">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_enterprise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve enterprise details and replace code-based fields with their descriptions.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enterprise_number (str): The enterprise number in the format &#39;XXXX.XXX.XXX&#39;.</span>
+<span class="sd">            language (str): The language for code table descriptions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary containing enterprise details with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT * FROM enterprise WHERE EnterpriseNumber = ?;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">enterprise_number</span><span class="p">,))</span>
+        <span class="n">enterprise</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">enterprise</span><span class="p">:</span>
+            <span class="n">enterprise</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">enterprise</span><span class="p">)</span>
+            <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;Status&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;Status&quot;</span><span class="p">,</span> <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;Status&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;JuridicalSituation&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;JuridicalSituation&quot;</span><span class="p">,</span> <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;JuridicalSituation&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;TypeOfEnterprise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;TypeOfEnterprise&quot;</span><span class="p">,</span> <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;TypeOfEnterprise&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;JuridicalForm&quot;</span><span class="p">]:</span>
+                <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;JuridicalForm&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_code</span><span class="p">(</span><span class="s2">&quot;JuridicalForm&quot;</span><span class="p">,</span> <span class="n">enterprise</span><span class="p">[</span><span class="s2">&quot;JuridicalForm&quot;</span><span class="p">],</span> <span class="n">language</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">enterprise</span></div>
+
+
+<div class="viewcode-block" id="CBEOpenData.search">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.search">[docs]</a>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve all information tied to an enterprise number, including enterprise details, denominations, addresses,</span>
+<span class="sd">        establishments, contacts, activities, and branches. This function mimics the data structure and details</span>
+<span class="sd">        available on the CBE Public Search website (https://kbopub.economie.fgov.be/kbopub/zoeknummerform.html).</span>
+
+<span class="sd">        The function replaces code-based fields (e.g., Status, JuridicalSituation, TypeOfEnterprise) with their</span>
+<span class="sd">        corresponding descriptions from the CBE code tables, based on the specified language.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enterprise_number (str): The enterprise number in the format &#39;XXXX.XXX.XXX&#39;.</span>
+<span class="sd">            language (str): The language for code table descriptions (e.g., &quot;NL&quot;, &quot;FR&quot;, &quot;DE&quot;, &quot;EN&quot;).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary containing all information tied to the enterprise, with code table lookups applied.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enterprise_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_enterprise</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">enterprise_data</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Enterprise &#39;</span><span class="si">{</span><span class="n">enterprise_number</span><span class="si">}</span><span class="s2">&#39; not found.&quot;</span><span class="p">)</span>
+
+        <span class="n">enterprise_data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;EnterpriseNumber&quot;</span><span class="p">:</span> <span class="n">enterprise_number</span><span class="p">,</span>
+                <span class="s2">&quot;denominations&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_denominations</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">),</span>
+                <span class="s2">&quot;addresses&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_addresses</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">),</span>
+                <span class="s2">&quot;establishments&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_establishments</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">),</span>
+                <span class="s2">&quot;contacts&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_contacts</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">),</span>
+                <span class="s2">&quot;activities&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_activities</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">,</span> <span class="n">language</span><span class="p">),</span>
+                <span class="s2">&quot;branches&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_branches</span><span class="p">(</span><span class="n">enterprise_number</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">enterprise_data</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Aziz Baatout.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
