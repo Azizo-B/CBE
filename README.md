@@ -1,6 +1,6 @@
 # CBE - Crossroads Bank for Enterprises Python Package
 
-**GitHub Repository**: [https://github.com/Azizo-B/cbe](https://github.com/azizo-b/CBE)
+**GitHub Repository**: [https://github.com/azizo-b/CBE](https://github.com/azizo-b/CBE)
 
 The **CBE** package provides a Python interface to work with the **Crossroads Bank for Enterprises (CBE)**, also known as:
 

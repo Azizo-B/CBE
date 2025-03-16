@@ -8,7 +8,7 @@ long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="cbe",
-    version="0.1.6",
+    version="0.1.7",
     license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -18,5 +18,5 @@ setup(
     author="Aziz Baatout",
     description="Python package to work with Crossroads Bank for Enterprises (CBE)",
     keywords=["cbe", "kbo", "bce", "belgium", "open data", "public search"],
-    url="https://github.com/Azizo-B/cbe",
+    url="https://github.com/azizo-b/CBE",
 )
