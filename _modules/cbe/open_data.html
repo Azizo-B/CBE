@@ -72,11 +72,23 @@
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">csv</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">zipfile</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">lru_cache</span><span class="p">,</span> <span class="n">wraps</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_file</span><span class="p">,</span> <span class="n">files</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">io</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextIOWrapper</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="cache">
+<a class="viewcode-back" href="../../cbe.html#cbe.open_data.cache">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cache</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># Preserves the original function&#39;s metadata (docstring, name, etc.)</span>
+    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>  <span class="c1"># Apply LRU cache to the wrapper</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># Accepts all arguments passed to the original function</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Call the original function with the arguments</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span></div>
+
 
 
 <div class="viewcode-block" id="CBEOpenData">
@@ -165,16 +177,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span> <span class="o">=</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db_path</span> <span class="o">=</span> <span class="n">db_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">force_load</span> <span class="o">=</span> <span class="n">force_load</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span> <span class="o">=</span> <span class="n">schema_path</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_schema_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_path</span><span class="p">)</span>
-
-        <span class="c1"># Use the packaged schema.sql if no custom schema_path is provided</span>
-        <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Load the schema file from the package</span>
-            <span class="n">schema_resource</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cbe&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;schema.sql&quot;</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">as_file</span><span class="p">(</span><span class="n">schema_resource</span><span class="p">)</span> <span class="k">as</span> <span class="n">schema_file</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">schema_file</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">schema_path</span> <span class="o">=</span> <span class="n">schema_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>  <span class="c1"># Enable row access by column name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA journal_mode = OFF;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA synchronous = 0;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA locking_mode = EXCLUSIVE;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;PRAGMA temp_store = MEMORY;&quot;</span><span class="p">)</span>
 
         <span class="c1"># Validate required files</span>
         <span class="n">zip_contents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">namelist</span><span class="p">())</span>
@@ -192,9 +201,6 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">extract_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">])</span>
                     <span class="k">break</span>  <span class="c1"># No need to read further</span>
 
-        <span class="c1"># Enable row access by column name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">row_factory</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span>
-
         <span class="c1"># Check if the meta table exists and if the extract number matches</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_should_load_data</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Skipping data loading because the extract number matches and force_load=False.&quot;</span><span class="p">)</span>
@@ -209,6 +215,12 @@
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Loading </span><span class="si">{</span><span class="n">csv_name</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_load_csv_file</span><span class="p">(</span><span class="n">csv_name</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_default_schema_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the default schema path from the package.&quot;&quot;&quot;</span>
+        <span class="n">schema_resource</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cbe&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;schema.sql&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">as_file</span><span class="p">(</span><span class="n">schema_resource</span><span class="p">)</span> <span class="k">as</span> <span class="n">schema_file</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">schema_file</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_should_load_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -271,7 +283,7 @@
         <span class="c1"># Read the CSV file in chunks to avoid loading the entire file into memory</span>
         <span class="n">chunk_iter</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">csv_name</span><span class="p">),</span>
-            <span class="n">chunksize</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>  <span class="c1"># Adjust chunk size based on memory constraints</span>
+            <span class="n">chunksize</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>  <span class="c1"># Adjust chunk size based on memory constraints</span>
             <span class="n">dtype</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>  <span class="c1"># Ensure all data is treated as strings</span>
             <span class="n">keep_default_na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>  <span class="c1"># Avoid interpreting empty strings as NaN</span>
         <span class="p">)</span>
@@ -302,7 +314,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.query">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.query">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">Row</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generic query method.&quot;&quot;&quot;</span>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db_conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
@@ -312,7 +324,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_code">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_code">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Fetch the code table entry for a given category, code, and language.</span>
@@ -335,7 +347,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_denominations">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_denominations">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_denominations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve denominations for a given entity (enterprise or establishment).</span>
@@ -361,7 +373,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_addresses">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_addresses">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_addresses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve addresses for a given entity (enterprise or establishment).</span>
@@ -386,7 +398,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_contacts">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_contacts">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_contacts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve contacts for a given entity (enterprise or establishment).</span>
@@ -412,7 +424,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_activities">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_activities">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_activities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve activities for a given entity (enterprise or establishment).</span>
@@ -446,7 +458,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_branches">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_branches">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_branches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve branches for a given enterprise.</span>
@@ -464,7 +476,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_establishments">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_establishments">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_establishments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve establishments for a given enterprise, including their addresses and denominations.</span>
@@ -491,7 +503,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.get_enterprise">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.get_enterprise">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_enterprise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve enterprise details and replace code-based fields with their descriptions.</span>
@@ -519,7 +531,7 @@
 
 <div class="viewcode-block" id="CBEOpenData.search">
 <a class="viewcode-back" href="../../cbe.html#cbe.open_data.CBEOpenData.search">[docs]</a>
-    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="nd">@cache</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enterprise_number</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;NL&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Retrieve all information tied to an enterprise number, including enterprise details, denominations, addresses,</span>
