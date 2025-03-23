@@ -26,3 +26,7 @@ venv/
 *.env
 *.ini
 *.cfg
+
+*.ipynb
+data/
+*.db

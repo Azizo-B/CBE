@@ -1,11 +1,20 @@
 import csv
 import sqlite3
 import zipfile
-from functools import lru_cache
+from functools import lru_cache, wraps
 from importlib.resources import as_file, files
 from io import TextIOWrapper
 
 import pandas as pd
+
+
+def cache(func):
+    @wraps(func)  # Preserves the original function's metadata (docstring, name, etc.)
+    @lru_cache(maxsize=512)  # Apply LRU cache to the wrapper
+    def wrapper(*args, **kwargs):  # Accepts all arguments passed to the original function
+        return func(*args, **kwargs)  # Call the original function with the arguments
+
+    return wrapper
 
 
 class CBEOpenData:
@@ -90,16 +99,13 @@ class CBEOpenData:
         self.zip_file = zipfile.ZipFile(self.zip_path, "r")
         self.db_path = db_path
         self.force_load = force_load
+        self.schema_path = schema_path or self._get_default_schema_path()
         self.db_conn = sqlite3.connect(self.db_path)
-
-        # Use the packaged schema.sql if no custom schema_path is provided
-        if schema_path is None:
-            # Load the schema file from the package
-            schema_resource = files("cbe").joinpath("schema.sql")
-            with as_file(schema_resource) as schema_file:
-                self.schema_path = str(schema_file)
-        else:
-            self.schema_path = schema_path
+        self.db_conn.row_factory = sqlite3.Row  # Enable row access by column name
+        self.db_conn.execute("PRAGMA journal_mode = OFF;")
+        self.db_conn.execute("PRAGMA synchronous = 0;")
+        self.db_conn.execute("PRAGMA locking_mode = EXCLUSIVE;")
+        self.db_conn.execute("PRAGMA temp_store = MEMORY;")
 
         # Validate required files
         zip_contents = set(self.zip_file.namelist())
@@ -117,9 +123,6 @@ class CBEOpenData:
                     self.extract_number = int(row["Value"])
                     break  # No need to read further
 
-        # Enable row access by column name
-        self.db_conn.row_factory = sqlite3.Row
-
         # Check if the meta table exists and if the extract number matches
         if not self._should_load_data():
             print("Warning: Skipping data loading because the extract number matches and force_load=False.")
@@ -133,6 +136,12 @@ class CBEOpenData:
             if csv_name.endswith(".csv"):
                 print(f"Loading {csv_name}...")
                 self._load_csv_file(csv_name)
+
+    def _get_default_schema_path(self) -> str:
+        """Get the default schema path from the package."""
+        schema_resource = files("cbe").joinpath("schema.sql")
+        with as_file(schema_resource) as schema_file:
+            return str(schema_file)
 
     def _should_load_data(self) -> bool:
         """
@@ -195,7 +204,7 @@ class CBEOpenData:
         # Read the CSV file in chunks to avoid loading the entire file into memory
         chunk_iter = pd.read_csv(
             self.zip_file.open(csv_name),
-            chunksize=10000,  # Adjust chunk size based on memory constraints
+            chunksize=1000000,  # Adjust chunk size based on memory constraints
             dtype=str,  # Ensure all data is treated as strings
             keep_default_na=False,  # Avoid interpreting empty strings as NaN
         )
@@ -224,14 +233,14 @@ class CBEOpenData:
             print("Closing ZIP file")
             self.zip_file.close()
 
-    @lru_cache(maxsize=512)
+    @cache
     def query(self, query: str, params: tuple = ()) -> list[sqlite3.Row]:
         """Generic query method."""
         cursor = self.db_conn.cursor()
         cursor.execute(query, params)
         return cursor.fetchall()
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_code(self, category: str, code: str, language: str = "NL") -> dict:
         """
         Fetch the code table entry for a given category, code, and language.
@@ -251,7 +260,7 @@ class CBEOpenData:
         row = cursor.fetchone()
         return dict(row) if row else None
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_denominations(self, entity_number: str, language: str = "NL") -> list:
         """
         Retrieve denominations for a given entity (enterprise or establishment).
@@ -274,7 +283,7 @@ class CBEOpenData:
 
         return denominations
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_addresses(self, entity_number: str, language: str = "NL") -> list:
         """
         Retrieve addresses for a given entity (enterprise or establishment).
@@ -296,7 +305,7 @@ class CBEOpenData:
 
         return addresses
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_contacts(self, entity_number: str, language: str = "NL") -> list:
         """
         Retrieve contacts for a given entity (enterprise or establishment).
@@ -319,7 +328,7 @@ class CBEOpenData:
 
         return contacts
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_activities(self, entity_number: str, language: str = "NL") -> list:
         """
         Retrieve activities for a given entity (enterprise or establishment).
@@ -350,7 +359,7 @@ class CBEOpenData:
 
         return activities
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_branches(self, enterprise_number: str) -> list:
         """
         Retrieve branches for a given enterprise.
@@ -365,7 +374,7 @@ class CBEOpenData:
         cursor.execute("SELECT * FROM branch WHERE EnterpriseNumber = ?;", (enterprise_number,))
         return [dict(row) for row in cursor.fetchall()]
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_establishments(self, enterprise_number: str, language: str = "NL") -> list:
         """
         Retrieve establishments for a given enterprise, including their addresses and denominations.
@@ -389,7 +398,7 @@ class CBEOpenData:
 
         return establishments
 
-    @lru_cache(maxsize=512)
+    @cache
     def get_enterprise(self, enterprise_number: str, language: str = "NL") -> dict:
         """
         Retrieve enterprise details and replace code-based fields with their descriptions.
@@ -414,7 +423,7 @@ class CBEOpenData:
 
         return enterprise
 
-    @lru_cache(maxsize=512)
+    @cache
     def search(self, enterprise_number: str, language: str = "NL") -> dict:
         """
         Retrieve all information tied to an enterprise number, including enterprise details, denominations, addresses,
